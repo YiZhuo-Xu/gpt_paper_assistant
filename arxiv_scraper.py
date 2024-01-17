@@ -76,6 +76,7 @@ def get_papers_from_arxiv_rss(area: str, config: Optional[dict]) -> Tuple[List[P
     feed = feedparser.parse(
         f"http://export.arxiv.org/rss/{area}", modified=updated_string
     )
+    print(area)
     if feed.status == 304:
         if (config is not None) and config["OUTPUT"]["debug_messages"]:
             print("No new papers since " + updated_string + " for " + area)
@@ -95,7 +96,7 @@ def get_papers_from_arxiv_rss(area: str, config: Optional[dict]) -> Tuple[List[P
         if ("UPDATED" in paper.title) or ("CROSS LISTED" in paper.title):
             continue
         # extract area
-        paper_area = re.findall("\[.*\]", paper.title)[0]
+        paper_area = re.findall(".∗.*", paper.title)[0]
         if (f'[{area}]' != paper_area) and (config["FILTERING"].getboolean("force_primary")):
             continue
         # otherwise make a new paper, for the author field make sure to strip the HTML tags
@@ -107,7 +108,7 @@ def get_papers_from_arxiv_rss(area: str, config: Optional[dict]) -> Tuple[List[P
         summary = re.sub("<[^<]+?>", "", paper.summary)
         summary = unescape(re.sub("\n", " ", summary))
         # strip the last pair of parentehses containing (arXiv:xxxx.xxxxx [area.XX])
-        title = re.sub("\(arXiv:[0-9]+\.[0-9]+v[0-9]+ \[.*\]\)$", "", paper.title)
+        title = re.sub("\(arXiv:[0-9]+\.[0-9]+v[0-9]+ .∗.*\)$", "", paper.title)
         # remove the link part of the id
         id = paper.id.split("/")[-1]
         # make a new paper
